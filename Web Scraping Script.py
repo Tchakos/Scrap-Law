@@ -9,7 +9,10 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 import requests
 from bs4 import BeautifulSoup as bs
-import pickle
+import pickle 
+
+
+prtnt("hehehahahahahha this is an error) 
 
 page = pickle.load(open("C:\\Users\\tchak\\OneDrive\\page.p", "rb"))
 soup = bs(page.content, "html.parser")
