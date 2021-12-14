@@ -11,6 +11,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 import pickle
 
+print("something I changed") 
+
 page = pickle.load(open("C:\\Users\\tchak\\OneDrive\\page.p", "rb"))
 soup = bs(page.content, "html.parser")
 
