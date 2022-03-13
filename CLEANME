@@ -1,0 +1,215 @@
+import requests
+from bs4 import BeautifulSoup as bs #Thats some bs!!!
+import re
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By 
+import selenium
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options 
+from random import randint
+from time import sleep
+from requests_ip_rotator import ApiGateway, EXTRA_REGIONS, ALL_REGIONS
+import socket 
+import random
+import os 
+import glob
+
+
+
+
+#####
+
+
+
+
+#CHROME DRIVER FOR SELENIUM  - MOSTLY JUST USED FOR THE BELOW CODE BLOCK 
+PATH = 'C:\\Users\\tchak\\OneDrive\\Desktop\\chromedriver.exe' 
+service = Service(executable_path='C:\\Users\\tchak\\OneDrive\\Desktop\\chromedriver.exe')
+driver = webdriver.Chrome(PATH)
+
+
+
+
+############
+
+
+
+#THIS GETS THE INITIAL CASES FROM THE GOOGLE SEARCH
+
+def find_new_case_links(a): #This gets you links to cases  
+    pattern = re.compile(r'scholar_case\?case') #separating out the case links
+    matches = pattern.findall(a)
+    for match in matches: 
+            return match
+
+
+all_urls_before_2016 = []
+
+n_pages = 46
+for page in range(n_pages):
+    url = "https://scholar.google.com/scholar?start=" + str((page - 1) * 10) + (r'&q="manish s. shah,+district+judge"+OR+"manish shah,+district+judge"+AND+"memorandum+opinion+and+order"&hl=en&as_sdt=4,332')
+    driver.get(url) 
+    soup = bs(driver.page_source, 'html.parser')
+    a_selector = soup.select('a') #everything tag with a tag in it
+    for link in a_selector:
+        all_urls_before_2016.append(link['href']) #this gets all urls 
+    sleep(randint(10,60))
+
+only_case_links_before_2016 = [] #All the cases before 2016 in case I need to break it up -- a google search only gets top 1000 cases
+for i in all_urls_before_2016:
+    if type(find_new_case_links(i)) == str: #Filtering so that only matches are returned 
+        only_case_links_before_2016.append(i)
+
+real_case_links = []
+for i in only_case_links_before_2016:
+    if i not in real_case_links:
+        real_case_links.append(i) #Make sure no duplicate cases
+full_case_links = ["https://scholar.google.com" + i for i in real_case_links] #getting the full case links e
+
+#print(len(full_case_links)) #Make sure number matches the other number 
+
+
+
+####### 
+
+
+#MAKE SURE PROXIES WORK 
+def myping(host):
+    response = os.system("ping -n 1" + host) # ping -n 1 
+    print(response)
+    if response == 1:
+        return True
+    else:
+        return False
+problem_list = [] 
+
+#MAKE A LIST OF PROXIES
+ip_list = [] 
+with ApiGateway("https://quotes.toscrape.com", regions = EXTRA_REGIONS, access_key_id = ACCESS_KEY_ID, access_key_secret = ACCESS_KEY_SECRET) as g: 
+    session = requests.Session()
+    session.mount("https://quotes.toscrape.com", g)
+    response = session.get("https://quotes.toscrape.com")
+    for i in g.endpoints:
+        ip_list.append(socket.gethostbyname(i))
+    proxy_list = [] 
+    for i in ip_list:
+        # if myping(i) == True:
+        proxy_list.append(i)
+
+
+########## 
+
+print(proxy_list)
+print(random.choice(proxy_list))
+
+
+
+######### 
+
+
+def find_new_case_links(a): #This gets you links to cases  
+    pattern = re.compile(r'scholar_case\?case') #separating out the case links
+    matches = pattern.findall(a)
+    for match in matches: 
+            return match
+
+def find_regex(a):
+    num_pattern = re.compile(r'\d{20}|\d{19}|\d{18}|/d{21}|\d{17}|\d{22}|\d{16}|\d{23}|\d{15}|\d{24}|\d{14}')
+    matches = num_pattern.findall(a)
+    for match in matches:
+        return match
+
+
+for i in real_case_links:
+    print(find_regex(i))
+    #new_folder = 'C:\\Users\\tchak\\OneDrive\\Documents\\testing\\' + str(find_regex(page))
+    #os.makedirs(new_folder)
+    
+########## 
+
+def find_regex(a):
+    num_pattern = re.compile(r'\d{20}|\d{19}|\d{18}|/d{21}|\d{17}|\d{22}|\d{16}|\d{23}|\d{15}|\d{24}|\d{14}')
+    matches = num_pattern.findall(a)
+    for match in matches:
+        return match
+
+regex_list = [] #list with just the regex list 
+for i in real_case_links:
+    regex_list.append(find_regex(i))
+    
+case_name = []
+for page in full_case_links:
+    if full_case_links.index(page) > 0:
+        random.choice(proxy_list)
+        url = page
+        response = session.get(url) 
+        case_index = full_case_links.index(page)
+        soup = bs(response.content, 'html.parser')
+        text_selector = soup.select('p') #the p tags have all the text for the cases ]
+        text_selector_text = [texts.text for texts in text_selector]
+        judge_url_list = []
+        alonso_case_links = [] 
+        a_selector = soup.select('a') #everything tag with a link in it
+        for link in a_selector:
+            try: 
+                judge_url_list.append(link['href']) #returning a list of strings because I had trouble writing soup object html to file
+            except:
+                KeyError
+                pass
+        for i in judge_url_list:
+            if type(find_new_case_links(i)) == str: #Filtering so that only matches are returned 
+                alonso_case_links.append(i)
+        case_name = soup.findAll("div", attrs={"id":"gs_hdr_md"}) #This gets you the casename listed at the top of each opinion
+        case_name_text = [j.text for j in case_name]
+        
+        new_folder = 'C:\\Users\\tchak\\OneDrive\\Documents\\manish s shah\\' + str(find_regex(page)) + '\\'
+        os.mkdir(new_folder)
+        #path = 'C:\\Users\\tchak\\OneDrive\\Documents\\manish shah\\' #path for jorge's cases 
+
+        path_urls = new_folder + "urls" + '.txt' #full folder path
+        path_name = new_folder + 'name' + '.txt'
+        path_text = new_folder + 'text' + '.txt'
+        path_this_url = new_folder + 'this_url' + '.txt' #I
+        
+        d = open(path_name, 'w+')
+        try: 
+            d.writelines(case_name_text)
+        except: 
+            UnicodeEncodeError
+            problem_list.append(case_index)
+            pass
+        d.close 
+        e = open(path_text, 'w+')
+        try: 
+            e.writelines(text_selector_text)
+        except UnicodeEncodeError:
+            problem_list.append(case_index)
+            pass
+        e.close
+        f = open(path_urls, 'w+')
+        f.writelines(alonso_case_links) #printing a list so return all lines
+        f.close
+        g = open(path_this_url, 'w+')
+        g.writelines(page)
+        g.close
+        sleep(randint(10,59)) #REDUCING 
+
+
+
+############ 
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
